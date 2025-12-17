@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Flappy Bird Clone</title>
+
+<style>
+    body {
+        margin: 0;
+        height: 100vh;
+        background: #f5f1e8;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-family: Arial, sans-serif;
+    }
+
+    #game {
+        position: relative;
+        width: 400px;
+        height: 600px;
+        background: #ffffff;
+        border: 3px solid #2f2f2f;
+        overflow: hidden;
+    }
+
+    #bird {
+        position: absolute;
+        width: 32px;
+        height: 24px;
+        background: #ffcc00;
+        border-radius: 6px;
+        left: 80px;
+        top: 250px;
+    }
+
+    #bird::before {
+        content: "";
+        position: absolute;
+        width: 6px;
+        height: 6px;
+        background: #000;
+        border-radius: 50%;
+        top: 6px;
+        left: 18px;
+    }
+
+    #bird::after {
+        content: "";
+        position: absolute;
+        width: 8px;
+        height: 6px;
+        background: #ff9900;
+        right: -6px;
+        top: 10px;
+    }
+
+    .pipe {
+        position: absolute;
+        width: 60px;
+        background: #3b7d3b;
+    }
+
+    #score {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        font-weight: bold;
+    }
+
+    #highScore {
+        position: absolute;
+        top: 30px;
+        left: 10px;
+        font-size: 0.9rem;
+    }
+
+    #message {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        font-weight: bold;
+        display: none;
+    }
+</style>
+</head>
+<body>
+
+<div id="game">
+    <div id="score">Score: 0</div>
+    <div id="highScore">High Score: 0</div>
+    <div id="bird"></div>
+    <div id="message">Press Space to Start</div>
+</div>
+
+<script>
+const bird = document.getElementById("bird");
+const scoreText = document.getElementById("score");
+const highScoreText = document.getElementById("highScore");
+const message = document.getElementById("message");
+
+let birdY = 250;
+let velocity = 0;
+let gravity = 0.6;
+let jump = -10;
+
+let pipes = [];
+let frame = 0;
+let score = 0;
+let started = false;
+let gameOver = false;
+
+let highScore = localStorage.getItem("highScore") || 0;
+highScoreText.textContent = "High Score: " + highScore;
+
+function createPipe() {
+    const gap = 140;
+    const topHeight = Math.random() * 250 + 50;
+
+    const topPipe = document.createElement("div");
+    topPipe.className = "pipe";
+    topPipe.style.height = topHeight + "px";
+    topPipe.style.left = "400px";
+    topPipe.style.top = "0px";
+
+    const bottomPipe = document.createElement("div");
+    bottomPipe.className = "pipe";
+    bottomPipe.style.height = (600 - topHeight - gap) + "px";
+    bottomPipe.style.left = "400px";
+    bottomPipe.style.bottom = "0px";
+
+    document.getElementById("game").appendChild(topPipe);
+    document.getElementById("game").appendChild(bottomPipe);
+
+    pipes.push({ top: topPipe, bottom: bottomPipe, passed: false });
+}
+
+document.addEventListener("keydown", e => {
+    if (e.code === "Space") {
+        if (!started) {
+            started = true;
+            message.style.display = "none";
+        }
+        if (!gameOver) velocity = jump;
+        if (gameOver) location.reload();
+    }
+});
+
+function update() {
+    if (!started) {
+        message.style.display = "block";
+        requestAnimationFrame(update);
+        return;
+    }
+
+    velocity += gravity;
+    birdY += velocity;
+    bird.style.top = birdY + "px";
+
+    if (birdY < 0 || birdY > 576) endGame();
+
+    frame++;
+    if (frame % 120 === 0) createPipe();
+
+    pipes.forEach(p => {
+        let x = parseInt(p.top.style.left) - 2;
+        p.top.style.left = x + "px";
+        p.bottom.style.left = x + "px";
+
+        if (!p.passed && x < 80) {
+            score++;
+            p.passed = true;
+            scoreText.textContent = "Score: " + score;
+        }
+
+        if (collide(bird, p.top) || collide(bird, p.bottom)) endGame();
+    });
+
+    pipes = pipes.filter(p => parseInt(p.top.style.left) > -60);
+
+    requestAnimationFrame(update);
+}
+
+function collide(a, b) {
+    const r1 = a.getBoundingClientRect();
+    const r2 = b.getBoundingClientRect();
+    return !(
+        r1.right < r2.left ||
+        r1.left > r2.right ||
+        r1.bottom < r2.top ||
+        r1.top > r2.bottom
+    );
+}
+
+function endGame() {
+    gameOver = true;
+
+    if (score > highScore) {
+        highScore = score;
+        localStorage.setItem("highScore", highScore);
+        highScoreText.textContent = "High Score: " + highScore;
+    }
+
+    message.innerHTML = "Game Over<br>Press Space to Restart";
+    message.style.display = "block";
+}
+
+update();
+</script>
+
+</body>
+</html>

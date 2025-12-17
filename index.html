@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Photography</title>
+    <link rel="stylesheet" href="styles/scratch.css">
+</head>
+<body>
+    <header id="top" class="header">
+        <h1 class="site-title">Photography</h1>
+        <nav class="nav">
+            <a href="Pages/game.html">Game</a>
+            <a href="Final.html">Resume</a>
+            <a href="#inspiration">Inspiration</a>
+            <a href="#tips">Tips</a>
+            <a href="#gallery">My Work</a>
+            <a href="#tableau">Utah Map</a>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Hero with IMG_0150 near the top -->
+        <section class="hero">
+            <div class="hero-text">
+                <h2>Photography in my life</h2>
+                <p>
+                    Photography has been a big part of my life for a while. In high school I joined the yearbook staff, and I loved getting to walk around with a camera and capture moments from games, assemblies, and everyday school life. It was fun knowing my photos would end up in the yearbook and mean something to people later. When I went to college, I brought an old camera I found to capture the moments of college. Using that camera has made me slow down, capture moments, and create memories that will be visable for generations.
+                </p>
+            </div>
+            <div class="hero-image-wrap">
+                <img src="images/Me+camera.JPG"
+                     alt="Photographer looking at camera in the desert"
+                     class="hero-image">
+            </div>
+        </section>
+
+        <!-- Inspiration / YouTube -->
+        <section id="inspiration" class="section">
+            <h2>My inspiration</h2>
+            <p>
+                This video is an introduction to my brothers Yourube channel. He has been a huge inspiration to me in my journey of learning photography.
+            </p>
+
+            <div class="video-container">
+                <iframe
+                    src="https://www.youtube.com/embed/PlMgGFyIj2s"
+                    title="YouTube video player"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowfullscreen>
+                </iframe>
+            </div>
+
+            <p class="small-link"><a href="#top">Back to top</a></p>
+        </section>
+
+        <!-- Tips with nested lists -->
+        <section id="tips" class="section">
+            <h2>Top 3 Photography Tips</h2>
+            <ol class="tips">
+                <li>
+                    Pay attention to light
+                    <ul>
+                        <li>Use sunrise and sunset for softer, warmer color.</li>
+                        <li>Look for side light to show texture.</li>
+                    </ul>
+                </li>
+                <li>
+                    Keep the frame simple
+                    <ul>
+                        <li>Move closer instead of relying on zoom.</li>
+                        <li>Avoid cluttered backgrounds when possible.</li>
+                    </ul>
+                </li>
+                <li>
+                    Add a story element
+                    <ul>
+                        <li>Include foreground, midground, and background.</li>
+                        <li>Think about what the viewer should feel.</li>
+                    </ul>
+                </li>
+            </ol>
+        </section>
+
+        <!-- Gallery -->
+        <section id="gallery" class="section">
+            <h2>My Work</h2>
+            <p>
+                A few favorite images from mountains, canyons, and roads in Utah.
+            </p>
+
+            <div class="gallery">
+                <figure class="gallery-item">
+                    <img src="images/Sunrise.JPEG" alt="Mountain sunrise landscape">
+                    <figcaption>Early light over distant ridges.</figcaption>
+                </figure>
+
+                <figure class="gallery-item">
+                    <img src="images/Cloudy.jpg" alt="Mountain valley landscape">
+                    <figcaption>Looking down a green valley on a cloudy day.</figcaption>
+                </figure>
+
+                <figure class="gallery-item">
+                    <img src="images/Desert_road.jpg" alt="Red rock desert road">
+                    <figcaption>Driving through tall red rock walls.</figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <!-- Tableau -->
+        <section id="tableau" class="section">
+            <h2>Top Photography Locations in Utah</h2>
+            <p>
+                This Tableau map shows popular photography locations across Utah that are worth exploring.
+            </p>
+
+            <div class="tableau-container">
+                <iframe
+                    src="https://public.tableau.com/views/topphotographylocationsinutah/TopPhotographyLocationsinUtah?:showVizHome=no&:embed=true"
+                    title="Top Photography Locations in Utah - Tableau Visualization"
+                    frameborder="0"
+                    scrolling="no">
+                </iframe>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p class="footer-links">
+            <a href="#top">Back to top</a>
+        </p>
+    </footer>
+</body>
+</html>
