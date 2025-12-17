@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Flappy Bird Clone</title>
+<title>Flappy Bird Clone+</title>
 
 <style>
     body {
         margin: 0;
         height: 100vh;
-        background: #f5f1e8;
+        background: linear-gradient(#cfe9ff, #f5f1e8);
         display: flex;
         justify-content: center;
         align-items: center;
@@ -19,9 +19,27 @@
         position: relative;
         width: 400px;
         height: 600px;
-        background: #ffffff;
+        background: linear-gradient(#8fd3ff, #ffffff);
         border: 3px solid #2f2f2f;
         overflow: hidden;
+    }
+
+    /* Parallax clouds */
+    .clouds {
+        position: absolute;
+        inset: 0;
+        background-image: repeating-linear-gradient(
+            90deg,
+            rgba(255,255,255,0.4) 0 40px,
+            transparent 40px 120px
+        );
+        animation: clouds 40s linear infinite;
+        pointer-events: none;
+    }
+
+    @keyframes clouds {
+        from { background-position-x: 0; }
+        to { background-position-x: -800px; }
     }
 
     #bird {
@@ -32,6 +50,7 @@
         border-radius: 6px;
         left: 80px;
         top: 250px;
+        transition: transform 0.1s linear;
     }
 
     #bird::before {
@@ -58,44 +77,71 @@
     .pipe {
         position: absolute;
         width: 60px;
-        background: #3b7d3b;
+        background: linear-gradient(#4caf50, #2e7d32);
     }
 
-    #score {
+    .pipe::after {
+        content: "";
         position: absolute;
-        top: 10px;
+        width: 70px;
+        height: 18px;
+        background: #2e7d32;
+        left: -5px;
+        bottom: -18px;
+    }
+
+    .pipe.bottom::after {
+        top: -18px;
+        bottom: auto;
+    }
+
+    #score, #highScore {
+        position: absolute;
         left: 10px;
         font-weight: bold;
+        z-index: 10;
     }
 
-    #highScore {
-        position: absolute;
-        top: 30px;
-        left: 10px;
-        font-size: 0.9rem;
-    }
+    #score { top: 10px; }
+    #highScore { top: 30px; font-size: 0.9rem; }
 
     #message {
         position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         text-align: center;
         font-weight: bold;
-        display: none;
+        background: rgba(255,255,255,0.7);
+        z-index: 20;
+    }
+
+    .shake {
+        animation: shake 0.2s;
+    }
+
+    @keyframes shake {
+        0% { transform: translateX(0); }
+        25% { transform: translateX(-4px); }
+        50% { transform: translateX(4px); }
+        75% { transform: translateX(-4px); }
+        100% { transform: translateX(0); }
     }
 </style>
 </head>
 <body>
 
 <div id="game">
+    <div class="clouds"></div>
     <div id="score">Score: 0</div>
     <div id="highScore">High Score: 0</div>
     <div id="bird"></div>
-    <div id="message">Press Space to Start</div>
+    <div id="message">Press Space or Tap to Start</div>
 </div>
 
 <script>
+const game = document.getElementById("game");
 const bird = document.getElementById("bird");
 const scoreText = document.getElementById("score");
 const highScoreText = document.getElementById("highScore");
@@ -109,8 +155,10 @@ let jump = -10;
 let pipes = [];
 let frame = 0;
 let score = 0;
+let speed = 2;
 let started = false;
 let gameOver = false;
+let paused = false;
 
 let highScore = localStorage.getItem("highScore") || 0;
 highScoreText.textContent = "High Score: " + highScore;
@@ -126,59 +174,65 @@ function createPipe() {
     topPipe.style.top = "0px";
 
     const bottomPipe = document.createElement("div");
-    bottomPipe.className = "pipe";
+    bottomPipe.className = "pipe bottom";
     bottomPipe.style.height = (600 - topHeight - gap) + "px";
     bottomPipe.style.left = "400px";
     bottomPipe.style.bottom = "0px";
 
-    document.getElementById("game").appendChild(topPipe);
-    document.getElementById("game").appendChild(bottomPipe);
-
+    game.append(topPipe, bottomPipe);
     pipes.push({ top: topPipe, bottom: bottomPipe, passed: false });
 }
 
-document.addEventListener("keydown", e => {
-    if (e.code === "Space") {
-        if (!started) {
-            started = true;
-            message.style.display = "none";
-        }
-        if (!gameOver) velocity = jump;
-        if (gameOver) location.reload();
+function flap() {
+    if (!started) {
+        started = true;
+        message.style.display = "none";
     }
+    if (!gameOver && !paused) velocity = jump;
+    if (gameOver) location.reload();
+}
+
+document.addEventListener("keydown", e => {
+    if (e.code === "Space") flap();
+    if (e.code === "KeyP") paused = !paused;
 });
 
+document.addEventListener("touchstart", flap);
+
 function update() {
-    if (!started) {
-        message.style.display = "block";
+    if (paused) {
         requestAnimationFrame(update);
         return;
     }
 
-    velocity += gravity;
-    birdY += velocity;
-    bird.style.top = birdY + "px";
+    if (started && !gameOver) {
+        velocity += gravity;
+        birdY += velocity;
+        bird.style.top = birdY + "px";
+        bird.style.transform = `rotate(${velocity * 3}deg)`;
 
-    if (birdY < 0 || birdY > 576) endGame();
+        if (birdY < 0 || birdY > 576) endGame();
 
-    frame++;
-    if (frame % 120 === 0) createPipe();
+        frame++;
+        if (frame % 120 === 0) createPipe();
 
-    pipes.forEach(p => {
-        let x = parseInt(p.top.style.left) - 2;
-        p.top.style.left = x + "px";
-        p.bottom.style.left = x + "px";
+        pipes.forEach(p => {
+            let x = parseInt(p.top.style.left) - speed;
+            p.top.style.left = x + "px";
+            p.bottom.style.left = x + "px";
 
-        if (!p.passed && x < 80) {
-            score++;
-            p.passed = true;
-            scoreText.textContent = "Score: " + score;
-        }
+            if (!p.passed && x < 80) {
+                score++;
+                p.passed = true;
+                speed = 2 + score * 0.05;
+                scoreText.textContent = "Score: " + score;
+            }
 
-        if (collide(bird, p.top) || collide(bird, p.bottom)) endGame();
-    });
+            if (collide(bird, p.top) || collide(bird, p.bottom)) endGame();
+        });
 
-    pipes = pipes.filter(p => parseInt(p.top.style.left) > -60);
+        pipes = pipes.filter(p => parseInt(p.top.style.left) > -80);
+    }
 
     requestAnimationFrame(update);
 }
@@ -186,16 +240,13 @@ function update() {
 function collide(a, b) {
     const r1 = a.getBoundingClientRect();
     const r2 = b.getBoundingClientRect();
-    return !(
-        r1.right < r2.left ||
-        r1.left > r2.right ||
-        r1.bottom < r2.top ||
-        r1.top > r2.bottom
-    );
+    return !(r1.right < r2.left || r1.left > r2.right ||
+             r1.bottom < r2.top || r1.top > r2.bottom);
 }
 
 function endGame() {
     gameOver = true;
+    game.classList.add("shake");
 
     if (score > highScore) {
         highScore = score;
@@ -203,8 +254,8 @@ function endGame() {
         highScoreText.textContent = "High Score: " + highScore;
     }
 
-    message.innerHTML = "Game Over<br>Press Space to Restart";
-    message.style.display = "block";
+    message.innerHTML = "Game Over<br>Press Space or Tap to Restart";
+    message.style.display = "flex";
 }
 
 update();
